@@ -1,28 +1,32 @@
-// function import kiya idhar
-import { createClient } from "@/lib/supabase/client"
+import { createClient } from '../lib/supabase/client'
 
-
-// function ko call kar diya client banaa ne ke liye.
-const supabase = createClient();
+const supabase = createClient()
 
 export default function Auth() {
+  async function login(provider: 'github' | 'google') {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider,
+      options: {
+        // After OAuth the user lands here; AuthCallback picks up the session
+        redirectTo: `${window.location.origin}/auth/callback`,
+      },
+    })
 
-    async function login(provider: "google" | "github") {
-        const { data, error } = await supabase.auth.signInWithOAuth({
-            provider:provider
-        })
-
-        if(error) {
-            alert("trouble signing in")
-        }else{
-            alert("signed in successfully")
-        }
+    if (error) {
+      alert('Error while signing in')
+      console.error(error)
     }
+  }
 
-    return (
-        <div>
-            <button onClick={() => login("google")}>Login with google</button>
-            <button onClick={() => login("github")}>Login with github</button>
-        </div>
-    )
+  return (
+    <div>
+      <button className='bg-blue-300 border-2 rounded-2xl p-1' onClick={() => login('google')}>
+        Login with Google
+      </button>
+
+      <button className='bg-amber-300 border-2 rounded-2xl p-1' onClick={() => login('github')}>
+        Login with GitHub
+      </button>
+    </div>
+  )
 }

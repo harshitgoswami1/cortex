@@ -13,12 +13,15 @@
   },
   "dependencies": {
     "@ai-sdk/openai": "^3.0.53",
+    "@openrouter/ai-sdk-provider": "^2.9.0",
+    "@openrouter/sdk": "^0.12.35",
     "@prisma/adapter-pg": "^7.8.0",
     "@prisma/client": "^7.8.0",
     "@supabase/supabase-js": "^2.104.1",
     "@tavily/core": "^0.7.2",
     "@types/express": "^5.0.6",
     "ai": "^6.0.168",
+    "axios": "^1.16.0",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
     "pg": "^8.20.0"

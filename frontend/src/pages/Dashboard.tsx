@@ -1,48 +1,30 @@
-import { createClient } from "@/lib/supabase/client";
-import type { User } from "@supabase/supabase-js";
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router";
+import { createClient } from "../lib/supabase/client";
+import type { User } from "@supabase/supabase-js";
 
 const supabase = createClient();
 
 export default function Dashboard() {
-    const [user, setUser] = useState<User | null>(null);
-    const [loading, setLoading] = useState(true);
-    const navigate = useNavigate();
+  const [user, setUser] = useState<User | null>(null);
 
-    useEffect(() => {
-        async function getUser() {
-            const { data } = await supabase.auth.getUser();
-            setUser(data.user ?? null);
-            setLoading(false);
-        }
+  useEffect(() => {
+    // Grab the current session once on mount
+    supabase.auth.getUser().then(({ data }) => {
+      setUser(data.user ?? null);
+    });
 
-        getUser();
-    }, []);
+    // Keep in sync with any auth state changes (e.g. token refresh, sign-out)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
 
-    if (loading) return <div>Loading...</div>;
+    return () => subscription.unsubscribe();
+  }, []); // ← empty dep array: run once, never loop
 
-    return (
-        <div>
-            {!user && (
-                <button onClick={() => navigate("/auth")}>
-                    Sign In
-                </button>
-            )}
-
-            {user && (
-                <div>
-                    {user.email}
-                    <button
-                        onClick={async () => {
-                            await supabase.auth.signOut();
-                            setUser(null);
-                        }}
-                    >
-                        Logout
-                    </button>
-                </div>
-            )}
-        </div>
-    );
+  return (
+    <div>
+      {/* ProtectedRoute guarantees user is logged in here, so no "Sign in" button needed */}
+      <p>Welcome, {user?.user_metadata?.full_name ?? user?.email}</p>
+    </div>
+  );
 }

@@ -3,6 +3,7 @@
     // Environment setup & latest features
     "lib": ["ESNext"],
     "types": ["bun-types"],
+    "typeRoots": ["./src/types", "./node_modules/@types"],
     "target": "ESNext",
     "module": "Preserve",
     "moduleDetection": "force",

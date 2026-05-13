@@ -1,33 +1,27 @@
-import { createServerClient } from '@supabase/ssr'
-import { cookies } from 'next/headers'
+import { createServerClient, parseCookieHeader, serializeCookieHeader } from '@supabase/ssr'
 
-/**
- * If using Fluid compute: Don't put this client in a global variable. Always create a new client within each
- * function when using it.
- */
-export async function createClient() {
-  const cookieStore = await cookies()
+export function createClient(request: Request) {
+  const headers = new Headers()
 
-  return createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
+  const supabase = createServerClient(
+    process.env.VITE_SUPABASE_URL!,
+    process.env.VITE_SUPABASE_PUBLISHABLE_KEY!,
     {
       cookies: {
         getAll() {
-          return cookieStore.getAll()
+          return parseCookieHeader(request.headers.get('Cookie') ?? '') as {
+            name: string
+            value: string
+          }[]
         },
         setAll(cookiesToSet) {
-          try {
-            cookiesToSet.forEach(({ name, value, options }) =>
-              cookieStore.set(name, value, options)
-            )
-          } catch {
-            // The `setAll` method was called from a Server Component.
-            // This can be ignored if you have middleware refreshing
-            // user sessions.
-          }
+          cookiesToSet.forEach(({ name, value, options }) =>
+            headers.append('Set-Cookie', serializeCookieHeader(name, value, options))
+          )
         },
       },
     }
   )
+
+  return { supabase, headers }
 }
